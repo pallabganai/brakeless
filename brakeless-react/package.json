@@ -1,13 +1,16 @@
-  {
+{
   "name": "brakeless-react",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "amazon-cognito-identity-js": "^1.16.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
   },
   "devDependencies": {
-    "react-scripts": "0.9.5"
+    "json-loader": "^0.5.4",
+    "react-scripts": "0.7.0",
+    "webpack": "^2.4.1"
   },
   "scripts": {
     "start": "react-scripts start",
