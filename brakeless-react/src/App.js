@@ -65,6 +65,7 @@ class App extends Component {
           <tr><td colSpan="2"><button onClick={(e) => this.doAuthentication(e)}>Sign In</button></td></tr>
         </table>
 
+
         <hr/>
 
         { items.map(item => <p>{item.id}</p>)}
@@ -223,6 +224,8 @@ class App extends Component {
         });
     }
   }
+
+
 
   componentDidMount() {
     this.loadAuthenticatedUser();
