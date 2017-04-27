@@ -33,8 +33,7 @@ class App extends Component {
         </p>
 
         <hr/>
-
-        <h3>Registration</h3>
+        <h3>AWS Cognito Registration</h3>
         <table>
           <tr><td>User Name : </td><td><input type="text" placeholder="User Name" ref={(input) => {this.userName=input}} /></td></tr>
           <tr><td>Email Id : </td><td><input type="text" placeholder="Email Id" ref={(input) => {this.emailId=input}} /></td></tr>
@@ -46,8 +45,7 @@ class App extends Component {
         </table>
 
         <hr/>
-
-        <h3>Registration Confirmation</h3>
+        <h3>AWS Cognito Registration Confirmation</h3>
         <table>
           <tr><td>User Name : </td><td><input type="text" placeholder="User Name" ref={(input) => {this.confirmUserName=input}} /></td></tr>
           <tr><td>Confirmation Code : </td><td><input type="text" placeholder="Confirmation Code" ref={(input) => {this.confirmationCode=input}} /></td></tr>
@@ -56,8 +54,7 @@ class App extends Component {
         </table>
 
         <hr/>
-
-        <h3>Authentication</h3>
+        <h3>AWS Cognito Authentication</h3>
         <table>
           <tr><td>User Name : </td><td><input type="text" placeholder="User Name" ref={(input) => {this.authUserName=input}} /></td></tr>
           <tr><td>Password : </td><td><input type="password" placeholder="Password" ref={(input) => {this.authPassword=input}} /></td></tr>
@@ -65,9 +62,8 @@ class App extends Component {
           <tr><td colSpan="2"><button onClick={(e) => this.doAuthentication(e)}>Sign In</button></td></tr>
         </table>
 
-
         <hr/>
-
+        <h3>AWS Lambda Call Result</h3>
         { items.map(item => <p>{item.id}</p>)}
       </div>
     );
@@ -225,12 +221,10 @@ class App extends Component {
     }
   }
 
-
-
   componentDidMount() {
     this.loadAuthenticatedUser();
 
-    /*var that= this;
+    var that= this;
     console.log("In componentDidMount");
 
     var apigClient = window.apigClientFactory.newClient();
@@ -265,7 +259,7 @@ class App extends Component {
           that.setState(result.data);
         }).catch( function(result){
           console.log(result);
-        });*/
+        });
   }
 }
 
