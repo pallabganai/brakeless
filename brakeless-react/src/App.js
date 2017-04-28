@@ -93,13 +93,17 @@ class App extends Component {
         onSuccess: function (result) {
             console.log('access token + ' + result.getAccessToken().getJwtToken());
 
-            // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-            //     IdentityPoolId : '...', // your identity pool id here
-            //     Logins : {
-            //         // Change the key below according to the specific region your user pool is in.
-            //         'cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>' : result.getIdToken().getJwtToken()
-            //     }
-            // });
+            var credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId : 'us-west-2:00a44276-ce02-42eb-a6c5-7a1df2933e7c', // your identity pool id here
+                Logins : {
+                    // Change the key below according to the specific region your user pool is in.
+                    'cognito-idp.us-west-2.amazonaws.com/us-west-2_T5m4Y3WHx' : result.getIdToken().getJwtToken()
+                }
+            }, {
+              region:"us-west-2"
+            });
+
+            console.log(credentials);
 
             // Instantiate aws sdk service objects now that the credentials have been updated.
             // example: var s3 = new AWS.S3();
@@ -185,6 +189,7 @@ class App extends Component {
   }
 
   loadAuthenticatedUser() {
+    var that= this;
     var cognitoUser = userPool.getCurrentUser();
 
     if (cognitoUser != null) {
@@ -214,7 +219,7 @@ class App extends Component {
                     'cognito-idp.us-west-2.amazonaws.com/us-west-2_T5m4Y3WHx' : session.getIdToken().getJwtToken()
                 }
             }, {
-              region:"us-west-2"
+              region: "us-west-2"
             });
 
             console.log(credentials);
@@ -224,6 +229,25 @@ class App extends Component {
                 console.log(err);
               } else {
                 console.log(credentials);
+
+                var lambda = new AWS.Lambda({credentials: credentials, region: "us-west-2"});
+                var params = {
+                  FunctionName: 'breaklessFeatureList', /* required */
+                  InvocationType: 'RequestResponse',
+                  LogType: 'Tail',
+                  Payload: new Buffer('')
+                };
+                lambda.invoke(params, function(err, result) {
+                  if (err) console.log(err, err.stack); // an error occurred
+                  else { // successful response
+                    console.log('result-');
+                    var lmdPay = JSON.parse(result.Payload);
+                    var lmdBody = JSON.parse(lmdPay.body);
+                    console.log(lmdBody);
+                    console.log('result end');
+                    that.setState(lmdBody);
+                  }
+                });
               }
             });
 
@@ -237,42 +261,42 @@ class App extends Component {
   componentDidMount() {
     this.loadAuthenticatedUser();
 
-    var that= this;
-    console.log("In componentDidMount");
-
-    var apigClient = window.apigClientFactory.newClient();
-
-    var params = {
-      // This is where any modeled request parameters should be added.
-      // The key is the parameter name, as it is defined in the API in API Gateway.
-      // param0: '',
-      // param1: ''
-    };
-
-    var body = {
-      // This is where you define the body of the request,
-    };
-
-    var additionalParams = {
-      // If there are any unmodeled query parameters or headers that must be
-      //   sent with the request, add them here.
-      headers: {
-        // param0: '',
-        // param1: ''
-      },
-      queryParams: {
-        // param0: '',
-        // param1: ''
-      }
-    };
-
-    apigClient.breaklessGet(params, body, additionalParams)
-        .then(function(result){
-          console.log(result.data);
-          that.setState(result.data);
-        }).catch( function(result){
-          console.log(result);
-        });
+    // var that= this;
+    // console.log("In componentDidMount");
+    //
+    // var apigClient = window.apigClientFactory.newClient();
+    //
+    // var params = {
+    //   // This is where any modeled request parameters should be added.
+    //   // The key is the parameter name, as it is defined in the API in API Gateway.
+    //   // param0: '',
+    //   // param1: ''
+    // };
+    //
+    // var body = {
+    //   // This is where you define the body of the request,
+    // };
+    //
+    // var additionalParams = {
+    //   // If there are any unmodeled query parameters or headers that must be
+    //   //   sent with the request, add them here.
+    //   headers: {
+    //     // param0: '',
+    //     // param1: ''
+    //   },
+    //   queryParams: {
+    //     // param0: '',
+    //     // param1: ''
+    //   }
+    // };
+    //
+    // apigClient.breaklessGet(params, body, additionalParams)
+    //     .then(function(result){
+    //       console.log(result.data);
+    //       that.setState(result.data);
+    //     }).catch( function(result){
+    //       console.log(result);
+    //     });
   }
 }
 
