@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {CognitoUserPool, CognitoUserAttribute, CognitoUser, AuthenticationDetails} from 'amazon-cognito-identity-js';
+import AWS from 'aws-sdk';
 
 var poolData = {
     UserPoolId : 'us-west-2_T5m4Y3WHx', // Your user pool id here
@@ -206,13 +207,25 @@ class App extends Component {
             //     }
             // });
 
-            // AWS.config.credentials = new CognitoIdentityCredentials({
-            //     IdentityPoolId : '...', // your identity pool id here
-            //     Logins : {
-            //         // Change the key below according to the specific region your user pool is in.
-            //         'cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>' : session.getIdToken().getJwtToken()
-            //     }
-            // });
+            var credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId : 'us-west-2:00a44276-ce02-42eb-a6c5-7a1df2933e7c', // your identity pool id here
+                Logins : {
+                    // Change the key below according to the specific region your user pool is in.
+                    'cognito-idp.us-west-2.amazonaws.com/us-west-2_T5m4Y3WHx' : session.getIdToken().getJwtToken()
+                }
+            }, {
+              region:"us-west-2"
+            });
+
+            console.log(credentials);
+
+            credentials.refresh(function(err, data) {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(credentials);
+              }
+            });
 
             // Instantiate aws sdk service objects now that the credentials have been updated.
             // example: var s3 = new AWS.S3();
