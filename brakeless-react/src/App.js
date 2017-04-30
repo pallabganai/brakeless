@@ -191,6 +191,7 @@ class App extends Component {
   loadAuthenticatedUser() {
     var that= this;
     var cognitoUser = userPool.getCurrentUser();
+    var creds;
 
     if (cognitoUser != null) {
         cognitoUser.getSession(function(err, session) {
@@ -199,61 +200,99 @@ class App extends Component {
                 return;
             }
 
-            console.log(session);
-
             console.log('session validity: ' + session.isValid());
 
-            // NOTE: getSession must be called to authenticate user before calling getUserAttributes
-            // cognitoUser.getUserAttributes(function(err, attributes) {
-            //     if (err) {
-            //         // Handle error
-            //     } else {
-            //         // Do something with attributes
-            //     }
-            // });
-
-            var credentials = new AWS.CognitoIdentityCredentials({
+            AWS.config.region = 'us-west-2'; // Region
+            creds = new AWS.CognitoIdentityCredentials({
                 IdentityPoolId : 'us-west-2:00a44276-ce02-42eb-a6c5-7a1df2933e7c', // your identity pool id here
                 Logins : {
                     // Change the key below according to the specific region your user pool is in.
                     'cognito-idp.us-west-2.amazonaws.com/us-west-2_T5m4Y3WHx' : session.getIdToken().getJwtToken()
                 }
-            }, {
-              region: "us-west-2"
             });
 
-            console.log(credentials);
+            console.log(creds);
+            console.log(session.getIdToken().getJwtToken());
 
-            credentials.refresh(function(err, data) {
+
+            creds.refresh(function(err, data) {
               if (err) {
                 console.log(err);
               } else {
-                console.log(credentials);
+                console.log("=====================================================");
+                console.log(creds);
+                console.log("identityId-" +creds.identityId);
+                console.log("accessKeyId-" +creds.accessKeyId);
+                console.log("secretAccessKey-" +creds.secretAccessKey);
+                console.log("sessionToken-" +creds.sessionToken);
 
-                var lambda = new AWS.Lambda({credentials: credentials, region: "us-west-2"});
-                var params = {
-                  FunctionName: 'breaklessFeatureList', /* required */
-                  InvocationType: 'RequestResponse',
-                  LogType: 'Tail',
-                  Payload: new Buffer('')
-                };
-                lambda.invoke(params, function(err, result) {
-                  if (err) console.log(err, err.stack); // an error occurred
-                  else { // successful response
-                    console.log('result-');
-                    var lmdPay = JSON.parse(result.Payload);
-                    var lmdBody = JSON.parse(lmdPay.body);
-                    console.log(lmdBody);
-                    console.log('result end');
-                    that.setState(lmdBody);
-                  }
+                var apigClient = window.apigClientFactory.newClient({
+                    accessKey: creds.accessKeyId,
+                    secretKey: creds.secretAccessKey,
+                    sessionToken: creds.sessionToken, //OPTIONAL: If you are using temporary credentials you must include the session token
+                    region: 'us-west-2' // OPTIONAL: The region where the API is deployed, by default this parameter is set to us-east-1
                 });
+
+                // var apigClient = window.apigClientFactory.newClient({
+                //   accessKey: credentials.accessKeyId,
+                //   secretKey:  credentials.secretAccessKey,
+                //   sessionToken: credentials.sessionToken, //OPTIONAL: If you are using temporary credentials you must include the session token
+                //   region: "us-west-2" // OPTIONAL: The region where the API is deployed, by default this parameter is set to us-east-1
+                // });
+
+                var params = {
+                  // This is where any modeled request parameters should be added.
+                  // The key is the parameter name, as it is defined in the API in API Gateway.
+                  // param0: '',
+                  // param1: ''
+                };
+
+                var body = {
+                  // This is where you define the body of the request,
+                };
+
+                var additionalParams = {
+                  // If there are any unmodeled query parameters or headers that must be
+                  //   sent with the request, add them here.
+                  headers: {
+                    // param0: '',
+                    // param1: ''
+                  },
+                  queryParams: {
+                    // param0: '',
+                    // param1: ''
+                  }
+                };
+
+                apigClient.breaklessGet(params, body, additionalParams)
+                    .then(function(result){
+                      console.log(result.data);
+                      that.setState(result.data);
+                    }).catch( function(result){
+                      console.log(result);
+                    });
+
+                // //lAMBDA
+                // var lambda = new AWS.Lambda({credentials: credentials, region: "us-west-2"});
+                // var params = {
+                //   FunctionName: 'breaklessFeatureList', /* required */
+                //   InvocationType: 'RequestResponse',
+                //   LogType: 'Tail',
+                //   Payload: new Buffer('')
+                // };
+                // lambda.invoke(params, function(err, result) {
+                //   if (err) console.log(err, err.stack); // an error occurred
+                //   else { // successful response
+                //     console.log('result-');
+                //     var lmdPay = JSON.parse(result.Payload);
+                //     var lmdBody = JSON.parse(lmdPay.body);
+                //     console.log(lmdBody);
+                //     console.log('result end');
+                //     that.setState(lmdBody);
+                //   }
+                // });
               }
             });
-
-            // Instantiate aws sdk service objects now that the credentials have been updated.
-            // example: var s3 = new AWS.S3();
-
         });
     }
   }
